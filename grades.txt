@@ -1,0 +1,11 @@
+ID Name         Subject     Score Grade
+001 Alice        Math        88    B+
+002 Bob          History     92    A-
+003 Charlie      Science     76    C+
+004 Diana        Math        95    A
+005 Ethan        History     67    D
+006 Fiona        Science     83    B
+007 George       Math        78    C+
+008 Hannah       History     90    A-
+009 Ian          Science     85    B+
+010 Julia        Math        91    A-
