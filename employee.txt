@@ -1,0 +1,21 @@
+ID,Name,Department,Salary,JoinDate
+101,John Smith,Engineering,75000,2018-06-12
+102,Jane Doe,Marketing,68000,2019-03-25
+103,Sam Lee,Sales,72000,2020-11-05
+104,Lisa Ray,Engineering,80000,2017-08-19
+105,Tom Brown,HR,65000,2021-01-10
+106,Nina Patel,Finance,85000,2016-04-22
+107,Mark Chen,Engineering,77000,2019-07-30
+108,Susan Park,Marketing,69000,2020-02-14
+109,Alex Kim,Sales,73000,2018-12-03
+110,Rachel Green,HR,66000,2022-05-17
+111,David Yang,Finance,88000,2015-09-09
+112,Emily Stone,Engineering,81000,2021-06-01
+113,Michael Scott,Sales,71000,2019-10-10
+114,Angela Martin,HR,64000,2020-01-20
+115,Oscar Martinez,Finance,87000,2017-03-15
+116,Kevin Malone,Engineering,76000,2018-08-08
+117,Stanley Hudson,Sales,70000,2022-03-03
+118,Phyllis Vance,Marketing,67000,2016-11-11
+119,Jim Halpert,Engineering,79000,2020-07-07
+120,Pam Beesly,HR,65500,2021-09-09
