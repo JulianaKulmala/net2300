@@ -45,14 +45,6 @@ This opens ports 3000 (frontend), 5000 (backend), and optionally 3306 (database)
 # Clone or navigate to the project
 cd log-app
 
-# IMPORTANT: Configure your server IP address
-# Copy the example environment file
-cp .env.example .env
-
-# Edit .env and set your Rocky Linux server IP address
-# Example: HOST_IP=192.168.1.100
-nano .env
-
 # Start everything with Docker Compose
 docker compose up -d
 
