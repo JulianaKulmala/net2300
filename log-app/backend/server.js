@@ -7,7 +7,11 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: '*', // Allow all origins (for development/testing)
+    methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 // MariaDB connection pool
@@ -161,8 +165,10 @@ app.delete('/api/logs', async (req, res) => {
 async function startServer() {
     try {
         await initDatabase();
-        app.listen(PORT, () => {
-            console.log(`✓ Server running on http://localhost:${PORT}`);
+        app.listen(PORT, '0.0.0.0', () => {
+            console.log(`✓ Server running on http://0.0.0.0:${PORT}`);
+            console.log(`✓ Health check: http://localhost:${PORT}/api/health`);
+            console.log(`✓ API endpoint: http://localhost:${PORT}/api/logs`);
         });
     } catch (error) {
         console.error('Failed to start server:', error);
