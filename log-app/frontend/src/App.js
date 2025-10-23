@@ -9,7 +9,9 @@ function App() {
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState('ALL');
 
-  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+  // Use environment variable or detect current hostname
+  const API_URL = process.env.REACT_APP_API_URL || 
+                  `http://${window.location.hostname}:5000/api`;
 
   // Fetch logs
   const fetchLogs = async () => {
