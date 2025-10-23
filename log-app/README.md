@@ -1,0 +1,347 @@
+# MariaDB Log Manager
+
+A full-stack React application for writing and managing logs in a MariaDB database.
+
+## 🚀 Features
+
+- ✅ Create log entries with different severity levels (DEBUG, INFO, WARN, ERROR, FATAL)
+- ✅ View all logs with real-time refresh
+- ✅ Filter logs by severity level
+- ✅ Add metadata (JSON) to log entries
+- ✅ Delete individual logs or clear all logs
+- ✅ Beautiful, responsive UI
+- ✅ RESTful API backend with Express
+- ✅ Apache HTTP Server for production frontend
+- ✅ MariaDB integration with connection pooling
+
+## 📋 Prerequisites
+
+**For Docker (Recommended):**
+- Docker
+- Docker Compose
+
+**Rocky Linux Quick Install:**
+```bash
+sudo ./install-docker-rocky.sh
+```
+See [INSTALL-DOCKER.md](INSTALL-DOCKER.md) for details.
+
+**For Manual Setup:**
+- Node.js (v14 or higher)
+- npm or yarn
+- MariaDB or MySQL server
+
+## 🛠️ Installation
+
+### Quick Start with Docker
+
+```bash
+# Clone or navigate to the project
+cd log-app
+
+# Start everything with Docker Compose
+docker compose up -d
+
+# Or use the Makefile
+make up
+
+# Open browser to http://localhost:3000
+```
+
+That's it! Skip to the [API Endpoints](#-api-endpoints) section.
+
+📘 **For detailed Docker instructions**, see [DOCKER.md](DOCKER.md)  
+📘 **For Apache HTTP Server configuration**, see [APACHE.md](APACHE.md)
+
+### Manual Installation (without Docker)
+
+### 1. Install MariaDB (if not already installed)
+
+**Rocky Linux:**
+```bash
+sudo dnf install mariadb-server mariadb -y
+sudo systemctl start mariadb
+sudo systemctl enable mariadb
+```
+
+**macOS:**
+```bash
+brew install mariadb
+brew services start mariadb
+```
+
+**Linux (Ubuntu/Debian):**
+```bash
+sudo apt-get update
+sudo apt-get install mariadb-server
+sudo systemctl start mariadb
+```
+
+### 2. Secure MariaDB Installation (Optional but recommended)
+```bash
+sudo mysql_secure_installation
+```
+
+### 3. Create Database and User
+
+Log into MariaDB:
+```bash
+mysql -u root -p
+```
+
+Run these commands:
+```sql
+CREATE DATABASE logdb;
+CREATE USER 'logapp'@'localhost' IDENTIFIED BY 'your_secure_password';
+GRANT ALL PRIVILEGES ON logdb.* TO 'logapp'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+```
+
+### 4. Install Backend Dependencies
+
+```bash
+cd log-app/backend
+npm install
+```
+
+### 5. Configure Backend Environment
+
+Copy the example env file:
+```bash
+cp .env.example .env
+```
+
+Edit `.env` with your database credentials:
+```env
+PORT=5000
+DB_HOST=localhost
+DB_USER=logapp
+DB_PASSWORD=your_secure_password
+DB_NAME=logdb
+```
+
+### 6. Install Frontend Dependencies
+
+```bash
+cd ../frontend
+npm install
+```
+
+## 🏃 Running the Application
+
+### Option 1: Docker Compose (Recommended)
+
+The easiest way to run the entire stack:
+
+```bash
+cd log-app
+
+# Build and start all services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop all services
+docker-compose down
+
+# Stop and remove volumes (deletes database data)
+docker-compose down -v
+```
+
+**Services will be available at:**
+- Frontend: `http://localhost:3000`
+- Backend API: `http://localhost:5000`
+- MariaDB: `localhost:3306`
+
+**Default credentials:**
+- Database: `logdb`
+- User: `logapp`
+- Password: `logapp123`
+
+### Option 2: Manual Setup
+
+### Start Backend Server
+
+```bash
+cd backend
+npm start
+```
+
+Or with auto-reload during development:
+```bash
+npm run dev
+```
+
+The API will be available at `http://localhost:5000`
+
+### Start React Frontend
+
+In a new terminal:
+```bash
+cd frontend
+npm start
+```
+
+The app will open at `http://localhost:3000`
+
+## 📡 API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/health` | Health check |
+| GET | `/api/logs` | Get all logs (last 100) |
+| GET | `/api/logs/:level` | Get logs by level |
+| POST | `/api/logs` | Create a new log |
+| DELETE | `/api/logs/:id` | Delete a specific log |
+| DELETE | `/api/logs` | Clear all logs |
+
+### Example POST Request
+
+```bash
+curl -X POST http://localhost:5000/api/logs \
+  -H "Content-Type: application/json" \
+  -d '{
+    "level": "INFO",
+    "message": "User logged in successfully",
+    "source": "AuthService",
+    "metadata": {"userId": 123, "ip": "192.168.1.1"}
+  }'
+```
+
+## 🗄️ Database Schema
+
+```sql
+CREATE TABLE logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    level VARCHAR(20) NOT NULL,
+    message TEXT NOT NULL,
+    source VARCHAR(100),
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    metadata JSON,
+    INDEX idx_timestamp (timestamp),
+    INDEX idx_level (level)
+);
+```
+
+## 🎨 Log Levels
+
+- **DEBUG**: Detailed information for debugging
+- **INFO**: General informational messages
+- **WARN**: Warning messages
+- **ERROR**: Error messages
+- **FATAL**: Critical errors
+
+## 📦 Project Structure
+
+```
+log-app/
+├── backend/
+│   ├── server.js          # Express server
+│   ├── package.json       # Backend dependencies
+│   ├── Dockerfile         # Backend container config
+│   ├── .env.example       # Environment variables template
+│   └── .env               # Your config (not in git)
+├── frontend/
+│   ├── public/
+│   │   ├── index.html     # HTML template
+│   │   └── .htaccess      # Apache rewrite rules (alternative)
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── LogForm.js      # Form component
+│   │   │   └── LogList.js      # List component
+│   │   ├── App.js              # Main app
+│   │   ├── App.css             # Styles
+│   │   ├── index.js            # Entry point
+│   │   └── index.css           # Global styles
+│   ├── Dockerfile         # Frontend container config
+│   ├── apache.conf        # Apache HTTP Server configuration
+│   ├── package.json       # Frontend dependencies
+│   └── .env               # Frontend config
+├── docker-compose.yml     # Docker orchestration
+├── Makefile              # Helper commands
+├── install-docker-rocky.sh  # Docker installation script
+├── INSTALL-DOCKER.md     # Docker installation guide
+├── DOCKER.md             # Docker documentation
+├── APACHE.md             # Apache HTTP Server documentation
+└── README.md             # This file
+```
+
+## 🔧 Troubleshooting
+
+### Docker Issues
+
+**Port already in use:**
+```bash
+# Check what's using the port
+sudo lsof -i :3000  # or :5000, :3306
+
+# Change ports in docker-compose.yml
+# For example, change "3000:80" to "3001:80"
+```
+
+**Permission denied:**
+```bash
+# Run with sudo or add user to docker group (Rocky Linux)
+sudo usermod -aG docker $USER
+newgrp docker
+```
+
+**View container logs:**
+```bash
+docker-compose logs backend
+docker-compose logs frontend
+docker-compose logs mariadb
+```
+
+**Rebuild containers:**
+```bash
+docker-compose down
+docker-compose build --no-cache
+docker-compose up -d
+```
+
+### Manual Setup Issues
+
+### Backend won't connect to MariaDB
+- Check MariaDB is running: 
+  - Rocky Linux: `sudo systemctl status mariadb`
+  - macOS: `brew services list`
+  - Ubuntu/Debian: `systemctl status mariadb`
+- Verify credentials in `.env`
+- Check firewall settings (Rocky Linux: `sudo firewall-cmd --list-all`)
+
+### Port already in use
+- Backend: Change `PORT` in `backend/.env`
+- Frontend: Set `PORT=3001` in terminal before `npm start`
+
+### CORS errors
+- Ensure backend is running on port 5000
+- Check `REACT_APP_API_URL` in `frontend/.env`
+
+## 🚀 Production Deployment
+
+### Build Frontend
+```bash
+cd frontend
+npm run build
+```
+
+### Serve with Backend
+Update `backend/server.js` to serve static files:
+```javascript
+app.use(express.static(path.join(__dirname, '../frontend/build')));
+```
+
+## 📝 License
+
+MIT
+
+## 👤 Author
+
+Your Name
+
+## 🤝 Contributing
+
+Pull requests are welcome!

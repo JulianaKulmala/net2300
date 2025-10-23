@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  # MariaDB Database
+  mariadb:
+    image: mariadb:11.0
+    container_name: logapp-mariadb
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: logdb
+      MYSQL_USER: logapp
+      MYSQL_PASSWORD: logapp123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - logapp-network
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: logapp-backend
+    restart: unless-stopped
+    environment:
+      PORT: 5000
+      DB_HOST: mariadb
+      DB_USER: logapp
+      DB_PASSWORD: logapp123
+      DB_NAME: logdb
+      NODE_ENV: production
+    ports:
+      - "5000:5000"
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    networks:
+      - logapp-network
+
+  # Frontend React App
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: logapp-frontend
+    restart: unless-stopped
+    environment:
+      REACT_APP_API_URL: http://localhost:5000/api
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - logapp-network
+
+volumes:
+  mariadb_data:
+    driver: local
+
+networks:
+  logapp-network:
+    driver: bridge
