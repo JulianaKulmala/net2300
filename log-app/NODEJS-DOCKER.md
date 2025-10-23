@@ -125,17 +125,27 @@ docker compose build --no-cache
 
 ## Package Management
 
-### npm ci vs npm install
+### npm install vs npm ci
 
-This project uses `npm ci` (Clean Install):
+This project uses `npm install`:
 
 ```dockerfile
-RUN npm ci --only=production
+RUN npm install --production
 ```
 
-**Benefits:**
+**Why `npm install` instead of `npm ci`?**
+- Works without package-lock.json
+- More flexible for development
+- Automatically resolves dependency versions
+
+**Note:** For production environments, consider:
+1. Generate package-lock.json: `npm install` (locally)
+2. Commit package-lock.json to version control
+3. Update Dockerfile to use `npm ci --only=production`
+
+**Benefits of `npm ci` (when package-lock.json exists):**
 - Faster installation
-- Reproducible builds (uses package-lock.json)
+- Reproducible builds
 - Removes node_modules before install
 - Better for CI/CD pipelines
 
@@ -282,7 +292,7 @@ FROM node:18         # ~900MB
 ### 4. Production Dependencies Only
 
 ```dockerfile
-RUN npm ci --only=production
+RUN npm install --production
 ```
 
 **Result:** Excludes devDependencies like testing tools
