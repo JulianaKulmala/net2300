@@ -33,6 +33,29 @@ docker compose version
 
 📘 **For detailed installation instructions**, see [INSTALL-DOCKER.md](INSTALL-DOCKER.md)
 
+### Open Firewall Ports (Rocky Linux)
+
+After installing Docker, open the required ports:
+
+```bash
+sudo ./open-ports.sh
+```
+
+Or manually:
+```bash
+# Open frontend port
+sudo firewall-cmd --permanent --add-port=3000/tcp
+
+# Open backend API port
+sudo firewall-cmd --permanent --add-port=5000/tcp
+
+# Reload firewall
+sudo firewall-cmd --reload
+
+# Verify
+sudo firewall-cmd --list-all
+```
+
 ## Running the Application
 
 ### 1. Start All Services

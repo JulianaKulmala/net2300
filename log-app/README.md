@@ -26,6 +26,12 @@ sudo ./install-docker-rocky.sh
 ```
 See [INSTALL-DOCKER.md](INSTALL-DOCKER.md) for details.
 
+**Open Firewall Ports (Rocky Linux):**
+```bash
+sudo ./open-ports.sh
+```
+This opens ports 3000 (frontend), 5000 (backend), and optionally 3306 (database).
+
 **For Manual Setup:**
 - Node.js (v14 or higher)
 - npm or yarn
@@ -263,6 +269,8 @@ log-app/
 ├── docker-compose.yml     # Docker orchestration
 ├── Makefile              # Helper commands
 ├── install-docker-rocky.sh  # Docker installation script
+├── open-ports.sh         # Firewall port configuration script
+├── verify-docker.sh      # Docker verification script
 ├── INSTALL-DOCKER.md     # Docker installation guide
 ├── DOCKER.md             # Docker documentation
 ├── APACHE.md             # Apache HTTP Server documentation
@@ -317,6 +325,22 @@ docker-compose up -d
 ### Port already in use
 - Backend: Change `PORT` in `backend/.env`
 - Frontend: Set `PORT=3001` in terminal before `npm start`
+
+### Firewall blocking access (Rocky Linux)
+```bash
+# Check if ports are open
+sudo firewall-cmd --list-all
+
+# Open ports with script
+sudo ./open-ports.sh
+
+# Or manually open specific port
+sudo firewall-cmd --permanent --add-port=5000/tcp
+sudo firewall-cmd --reload
+
+# Check what's listening on ports
+sudo ss -tuln | grep -E ':(3000|5000|3306)'
+```
 
 ### CORS errors
 - Ensure backend is running on port 5000

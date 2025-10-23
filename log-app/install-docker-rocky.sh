@@ -151,7 +151,43 @@ if [ "$INSTALL_DOCKER" = true ]; then
         firewall-cmd --permanent --zone=trusted --add-interface=docker0 2>/dev/null || true
         firewall-cmd --permanent --zone=public --add-masquerade 2>/dev/null || true
         firewall-cmd --reload
-        print_info "Firewall configured"
+        print_info "Firewall configured for Docker"
+        
+        # Ask about opening application ports
+        echo ""
+        print_warn "Application Ports Configuration"
+        read -p "Open ports for the log application (3000, 5000, 3306)? [y/N]: " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            print_info "Opening port 3000 (Frontend - React App)..."
+            firewall-cmd --permanent --add-port=3000/tcp
+            
+            print_info "Opening port 5000 (Backend - API)..."
+            firewall-cmd --permanent --add-port=5000/tcp
+            
+            print_info "Opening port 3306 (MariaDB)..."
+            firewall-cmd --permanent --add-port=3306/tcp
+            
+            # Ask about HTTP/HTTPS ports
+            read -p "Also open HTTP (80) and HTTPS (443) ports? [y/N]: " -n 1 -r
+            echo
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                print_info "Opening port 80 (HTTP)..."
+                firewall-cmd --permanent --add-service=http
+                
+                print_info "Opening port 443 (HTTPS)..."
+                firewall-cmd --permanent --add-service=https
+            fi
+            
+            # Reload firewall to apply changes
+            firewall-cmd --reload
+            print_info "Application ports configured successfully!"
+            
+            # Display opened ports
+            echo ""
+            print_info "Current firewall configuration:"
+            firewall-cmd --list-all | grep -E "(ports|services)"
+        fi
     fi
 
     # Step 10: Ask to add user to docker group
