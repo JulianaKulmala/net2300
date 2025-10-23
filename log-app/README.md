@@ -20,7 +20,7 @@ A full-stack React application for writing and managing logs in a MariaDB databa
 - Docker
 - Docker Compose
 
-**Rocky Linux Quick Install:**
+**Rocky Linux Quick Install (Docker + Node.js):**
 ```bash
 sudo ./install-docker-rocky.sh
 ```
@@ -51,7 +51,8 @@ make up
 That's it! Skip to the [API Endpoints](#-api-endpoints) section.
 
 📘 **For detailed Docker instructions**, see [DOCKER.md](DOCKER.md)  
-📘 **For Apache HTTP Server configuration**, see [APACHE.md](APACHE.md)
+📘 **For Apache HTTP Server configuration**, see [APACHE.md](APACHE.md)  
+📘 **For Node.js in Docker setup**, see [NODEJS-DOCKER.md](NODEJS-DOCKER.md)
 
 ### Manual Installation (without Docker)
 
@@ -265,6 +266,7 @@ log-app/
 ├── INSTALL-DOCKER.md     # Docker installation guide
 ├── DOCKER.md             # Docker documentation
 ├── APACHE.md             # Apache HTTP Server documentation
+├── NODEJS-DOCKER.md      # Node.js in Docker guide
 └── README.md             # This file
 ```
 

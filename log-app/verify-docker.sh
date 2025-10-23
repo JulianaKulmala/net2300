@@ -1,10 +1,10 @@
 #!/bin/bash
 
 ################################################################################
-# Docker Installation Verification Script
+# Docker and Node.js Installation Verification Script
 # 
-# This script verifies that Docker and Docker Compose are properly installed
-# and working on Rocky Linux
+# This script verifies that Docker, Docker Compose, and Node.js are properly
+# installed and working on Rocky Linux
 #
 # Usage: ./verify-docker.sh
 ################################################################################
@@ -32,7 +32,7 @@ PASSED=0
 FAILED=0
 
 echo "========================================"
-echo "Docker Installation Verification"
+echo "Docker & Node.js Verification"
 echo "========================================"
 echo ""
 
@@ -111,6 +111,32 @@ echo ""
 # Check Docker info
 print_info "Docker system information:"
 docker info 2>/dev/null | grep -E "Server Version|Storage Driver|Cgroup Driver|Cgroup Version" || echo "   (Docker not accessible)"
+echo ""
+
+# Check if Node.js is installed
+print_info "Checking Node.js installation..."
+if command -v node &> /dev/null; then
+    print_pass "Node.js command found"
+    echo "   Version: $(node --version)"
+    ((PASSED++))
+else
+    print_fail "Node.js command not found"
+    echo "   (Optional - run install script to install Node.js)"
+    # Don't increment FAILED for optional component
+fi
+echo ""
+
+# Check if npm is installed
+print_info "Checking npm installation..."
+if command -v npm &> /dev/null; then
+    print_pass "npm command found"
+    echo "   Version: $(npm --version)"
+    ((PASSED++))
+else
+    print_fail "npm command not found"
+    echo "   (Optional - run install script to install npm)"
+    # Don't increment FAILED for optional component
+fi
 echo ""
 
 # Summary

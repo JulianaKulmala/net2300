@@ -44,6 +44,7 @@ services:
         condition: service_healthy
     networks:
       - logapp-network
+    # Note: Backend runs Node.js 18 Alpine with Express API
 
   # Frontend React App
   frontend:
@@ -60,6 +61,7 @@ services:
       - backend
     networks:
       - logapp-network
+    # Note: Uses Node.js 18 for build stage, then serves via Apache HTTP Server
 
 volumes:
   mariadb_data:
