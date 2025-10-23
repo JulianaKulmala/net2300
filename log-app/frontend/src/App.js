@@ -10,7 +10,7 @@ function App() {
   const [filter, setFilter] = useState('ALL');
 
   // Use environment variable or detect current hostname
-  const API_URL = "http://192.168.67.132:5000/api";
+  const API_URL = `http://${window.location.hostname}:5000/api`;
 
   // Fetch logs
   const fetchLogs = async () => {
