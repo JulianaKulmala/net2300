@@ -157,7 +157,6 @@ if systemctl is-active --quiet firewalld; then
             firewall-cmd --list-all | grep -E "(ports|services)"
         fi
     fi
-fi
 
 # Step 10: Ask to add user to docker group
 echo ""
