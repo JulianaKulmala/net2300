@@ -98,9 +98,9 @@ mysql -u root -p
 
 Run these commands:
 ```sql
-CREATE DATABASE migrate;
+CREATE DATABASE logdb;
 CREATE USER 'logapp'@'localhost' IDENTIFIED BY 'your_secure_password';
-GRANT ALL PRIVILEGES ON migrate.* TO 'logapp'@'localhost';
+GRANT ALL PRIVILEGES ON logdb.* TO 'logapp'@'localhost';
 FLUSH PRIVILEGES;
 EXIT;
 ```
@@ -125,7 +125,7 @@ PORT=5000
 DB_HOST=localhost
 DB_USER=logapp
 DB_PASSWORD=your_secure_password
-DB_NAME=migrate
+DB_NAME=logdb
 ```
 
 ### 6. Install Frontend Dependencies
@@ -164,7 +164,7 @@ docker-compose down -v
 - MariaDB: `localhost:3306`
 
 **Default credentials:**
-- Database: `migrate`
+- Database: `logdb`
 - User: `logapp`
 - Password: `logapp123`
 - Root Password: `rootpassword`

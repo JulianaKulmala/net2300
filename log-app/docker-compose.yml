@@ -8,7 +8,7 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: migrate
+      MYSQL_DATABASE: logdb
       MYSQL_USER: logapp
       MYSQL_PASSWORD: logapp123
     ports:
@@ -35,7 +35,7 @@ services:
       DB_HOST: mariadb
       DB_USER: logapp
       DB_PASSWORD: logapp123
-      DB_NAME: migrate
+      DB_NAME: logdb
       NODE_ENV: production
     ports:
       - "5000:5000"
