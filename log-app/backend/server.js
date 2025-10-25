@@ -39,7 +39,6 @@ async function initDatabase() {
             CREATE TABLE IF NOT EXISTS logs (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 message TEXT NOT NULL,
-                source VARCHAR(100),
                 status ENUM('pending', 'processing', 'done', 'error') DEFAULT 'pending',
                 timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 INDEX idx_timestamp (timestamp),
@@ -78,7 +77,7 @@ app.get('/api/logs', async (req, res) => {
 // Create a new log entry
 app.post('/api/logs', async (req, res) => {
     try {
-        const { message, source, status } = req.body;
+        const { message, status } = req.body;
         
         // Validation
         if (!message) {
@@ -93,8 +92,8 @@ app.post('/api/logs', async (req, res) => {
         const logStatus = status && validStatuses.includes(status) ? status : 'pending';
 
         const [result] = await pool.query(
-            'INSERT INTO logs (message, source, status) VALUES (?, ?, ?)',
-            [message, source || null, logStatus]
+            'INSERT INTO logs (message, status) VALUES (?, ?)',
+            [message, logStatus]
         );
 
         res.status(201).json({ 
@@ -102,7 +101,6 @@ app.post('/api/logs', async (req, res) => {
             data: { 
                 id: result.insertId,
                 message,
-                source,
                 status: logStatus
             }
         });

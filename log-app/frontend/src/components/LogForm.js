@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 function LogForm({ onSubmit }) {
   const [formData, setFormData] = useState({
     message: '',
-    source: '',
     status: 'pending'
   });
   const [error, setError] = useState('');
@@ -33,7 +32,6 @@ function LogForm({ onSubmit }) {
 
     const logData = {
       message: formData.message,
-      source: formData.source || undefined,
       status: formData.status
     };
 
@@ -45,7 +43,6 @@ function LogForm({ onSubmit }) {
       // Reset form
       setFormData({
         message: '',
-        source: '',
         status: 'pending'
       });
       setTimeout(() => setSuccess(''), 3000);
@@ -74,19 +71,6 @@ function LogForm({ onSubmit }) {
       </div>
 
       <div className="form-group">
-        <label htmlFor="source">Source(ignore for now)</label>
-        <input
-          type="text"
-          id="source"
-          name="source"
-          value={formData.source}
-          onChange={handleChange}
-          className="form-control"
-          placeholder="e.g., UserService, AuthController"
-        />
-      </div>
-
-      <div className="form-group">
         <label htmlFor="status">Status *</label>
         <select
           id="status"
@@ -104,7 +88,7 @@ function LogForm({ onSubmit }) {
       </div>
 
       <button type="submit" className="btn btn-primary" disabled={loading}>
-        {loading ? 'Creating...' : '✓ Create Log Entry'}
+        {loading ? 'Creating...' : '✓ Create command Entry'}
       </button>
     </form>
   );

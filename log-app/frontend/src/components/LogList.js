@@ -53,11 +53,6 @@ function LogList({ logs, onDelete, onStatusChange }) {
             </div>
           </div>
           <div className="log-message">{log.message}</div>
-          {log.source && (
-            <div className="log-source">
-              <strong>Source:</strong> {log.source}
-            </div>
-          )}
           <div className="log-status-badge">
             <span className={`badge ${getStatusClass(log.status)}`}>
               {log.status || 'pending'}
