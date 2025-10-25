@@ -38,13 +38,11 @@ async function initDatabase() {
         await connection.query(`
             CREATE TABLE IF NOT EXISTS logs (
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                level VARCHAR(20) NOT NULL,
                 message TEXT NOT NULL,
                 source VARCHAR(100),
                 timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 metadata JSON,
-                INDEX idx_timestamp (timestamp),
-                INDEX idx_level (level)
+                INDEX idx_timestamp (timestamp)
             )
         `);
         
@@ -76,52 +74,28 @@ app.get('/api/logs', async (req, res) => {
     }
 });
 
-// Get logs by level
-app.get('/api/logs/:level', async (req, res) => {
-    try {
-        const { level } = req.params;
-        const [rows] = await pool.query(
-            'SELECT * FROM logs WHERE level = ? ORDER BY timestamp DESC LIMIT 100',
-            [level]
-        );
-        res.json({ success: true, data: rows });
-    } catch (error) {
-        console.error('Error fetching logs by level:', error);
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
 // Create a new log entry
 app.post('/api/logs', async (req, res) => {
     try {
-        const { level, message, source, metadata } = req.body;
+        const { message, source, metadata } = req.body;
         
         // Validation
-        if (!level || !message) {
+        if (!message) {
             return res.status(400).json({ 
                 success: false, 
-                error: 'Level and message are required' 
-            });
-        }
-
-        const validLevels = ['DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL'];
-        if (!validLevels.includes(level.toUpperCase())) {
-            return res.status(400).json({ 
-                success: false, 
-                error: 'Invalid log level. Must be: DEBUG, INFO, WARN, ERROR, or FATAL' 
+                error: 'Message is required' 
             });
         }
 
         const [result] = await pool.query(
-            'INSERT INTO logs (level, message, source, metadata) VALUES (?, ?, ?, ?)',
-            [level.toUpperCase(), message, source || null, JSON.stringify(metadata || {})]
+            'INSERT INTO logs (message, source, metadata) VALUES (?, ?, ?)',
+            [message, source || null, JSON.stringify(metadata || {})]
         );
 
         res.status(201).json({ 
             success: true, 
             data: { 
                 id: result.insertId,
-                level: level.toUpperCase(),
                 message,
                 source,
                 metadata

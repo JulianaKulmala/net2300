@@ -7,7 +7,6 @@ function App() {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [filter, setFilter] = useState('ALL');
 
   // Use environment variable or detect current hostname
   const API_URL = `http://${window.location.hostname}:5000/api`;
@@ -17,11 +16,7 @@ function App() {
     setLoading(true);
     setError(null);
     try {
-      const endpoint = filter === 'ALL' 
-        ? `${API_URL}/logs` 
-        : `${API_URL}/logs/${filter}`;
-      
-      const response = await fetch(endpoint);
+      const response = await fetch(`${API_URL}/logs`);
       const data = await response.json();
       
       if (data.success) {
@@ -104,7 +99,7 @@ function App() {
 
   useEffect(() => {
     fetchLogs();
-  }, [filter]);
+  }, []);
 
   return (
     <div className="App">
@@ -126,18 +121,6 @@ function App() {
             <div className="logs-header">
               <h2>Log Entries</h2>
               <div className="controls">
-                <select 
-                  value={filter} 
-                  onChange={(e) => setFilter(e.target.value)}
-                  className="filter-select"
-                >
-                  <option value="ALL">All Levels</option>
-                  <option value="DEBUG">DEBUG</option>
-                  <option value="INFO">INFO</option>
-                  <option value="WARN">WARN</option>
-                  <option value="ERROR">ERROR</option>
-                  <option value="FATAL">FATAL</option>
-                </select>
                 <button onClick={fetchLogs} className="btn btn-secondary">
                   🔄 Refresh
                 </button>

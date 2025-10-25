@@ -1,17 +1,6 @@
 import React from 'react';
 
 function LogList({ logs, onDelete }) {
-  const getLevelClass = (level) => {
-    const classes = {
-      'DEBUG': 'level-debug',
-      'INFO': 'level-info',
-      'WARN': 'level-warn',
-      'ERROR': 'level-error',
-      'FATAL': 'level-fatal'
-    };
-    return classes[level] || 'level-info';
-  };
-
   const formatTimestamp = (timestamp) => {
     return new Date(timestamp).toLocaleString();
   };
@@ -32,11 +21,8 @@ function LogList({ logs, onDelete }) {
   return (
     <div className="log-list">
       {logs.map((log) => (
-        <div key={log.id} className={`log-item ${getLevelClass(log.level)}`}>
+        <div key={log.id} className="log-item">
           <div className="log-header">
-            <span className={`log-level ${getLevelClass(log.level)}`}>
-              {log.level}
-            </span>
             <span className="log-timestamp">{formatTimestamp(log.timestamp)}</span>
             <button
               onClick={() => onDelete(log.id)}
