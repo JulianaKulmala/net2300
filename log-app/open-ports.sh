@@ -6,7 +6,8 @@
 # This script will:
 # - Open port 3000 (Frontend - React App)
 # - Open port 5000 (Backend - API)
-# - Open port 3306 (MariaDB - optional, for external access)
+# - Open port 3306 (MariaDB)
+# - Open port 8080 (phpMyAdmin)
 # - Configure firewalld rules
 #
 # Usage: sudo ./open-ports.sh
@@ -83,6 +84,15 @@ else
     print_error "Failed to open port 3306"
 fi
 
+# Open port 8080 (phpMyAdmin)
+print_info "Opening port 8080 (phpMyAdmin)..."
+firewall-cmd --permanent --add-port=8080/tcp
+if [ $? -eq 0 ]; then
+    print_info "✓ Port 8080 opened"
+else
+    print_error "Failed to open port 8080"
+fi
+
 # Ask about HTTP/HTTPS ports
 echo ""
 read -p "Also open HTTP (80) and HTTPS (443) ports? [y/N]: " -n 1 -r
@@ -111,9 +121,10 @@ print_info "Ports Opened Successfully!"
 print_info "================================"
 echo ""
 print_info "You can now access:"
-echo "  - Frontend: http://$(hostname -I | awk '{print $1}'):3000"
+echo "  - Frontend:    http://$(hostname -I | awk '{print $1}'):3000"
 echo "  - Backend API: http://$(hostname -I | awk '{print $1}'):5000"
-echo "  - API Health: http://$(hostname -I | awk '{print $1}'):5000/api/health"
+echo "  - phpMyAdmin:  http://$(hostname -I | awk '{print $1}'):8080"
+echo "  - API Health:  http://$(hostname -I | awk '{print $1}'):5000/api/health"
 echo ""
 print_info "Useful Commands:"
 echo "  - View firewall status:  sudo firewall-cmd --list-all"

@@ -124,7 +124,7 @@ if systemctl is-active --quiet firewalld; then
         # Ask about opening application ports
         echo ""
         print_warn "Application Ports Configuration"
-        read -p "Open ports for the log application (3000, 5000, 3306)? [y/N]: " -n 1 -r
+        read -p "Open ports for the log application (3000, 5000, 3306, 8080)? [y/N]: " -n 1 -r
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
             print_info "Opening port 3000 (Frontend - React App)..."
@@ -135,6 +135,9 @@ if systemctl is-active --quiet firewalld; then
             
             print_info "Opening port 3306 (MariaDB)..."
             firewall-cmd --permanent --add-port=3306/tcp
+            
+            print_info "Opening port 8080 (phpMyAdmin)..."
+            firewall-cmd --permanent --add-port=8080/tcp
             
             # Ask about HTTP/HTTPS ports
             read -p "Also open HTTP (80) and HTTPS (443) ports? [y/N]: " -n 1 -r

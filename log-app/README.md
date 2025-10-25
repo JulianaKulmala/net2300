@@ -160,12 +160,19 @@ docker-compose down -v
 **Services will be available at:**
 - Frontend: `http://localhost:3000`
 - Backend API: `http://localhost:5000`
+- phpMyAdmin: `http://localhost:8080`
 - MariaDB: `localhost:3306`
 
 **Default credentials:**
 - Database: `logdb`
 - User: `logapp`
 - Password: `logapp123`
+- Root Password: `rootpassword`
+
+**phpMyAdmin Login:**
+- Server: `mariadb`
+- Username: `root` or `logapp`
+- Password: `rootpassword` or `logapp123`
 
 ### Option 2: Manual Setup
 
@@ -280,12 +287,35 @@ log-app/
 
 ## 🔧 Troubleshooting
 
+### phpMyAdmin Access
+
+**Cannot connect to phpMyAdmin:**
+```bash
+# Check if phpMyAdmin container is running
+docker ps | grep phpmyadmin
+
+# View phpMyAdmin logs
+docker logs logapp-phpmyadmin
+
+# Restart phpMyAdmin
+docker compose restart phpmyadmin
+```
+
+**Login issues:**
+- Server: Use `mariadb` (not localhost)
+- Username: `root` or `logapp`
+- Password: `rootpassword` or `logapp123`
+
+**Access from another machine:**
+- Make sure port 8080 is open: `sudo firewall-cmd --list-all`
+- Use server IP: `http://YOUR_SERVER_IP:8080`
+
 ### Docker Issues
 
 **Port already in use:**
 ```bash
 # Check what's using the port
-sudo lsof -i :3000  # or :5000, :3306
+sudo lsof -i :3000  # or :5000, :3306, :8080
 
 # Change ports in docker-compose.yml
 # For example, change "3000:80" to "3001:80"
