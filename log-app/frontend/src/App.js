@@ -104,22 +104,22 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>📝 MariaDB Log Manager</h1>
-        <p>React Application for Writing Logs to MariaDB</p>
+        <h1>📝 MariaDB command Manager</h1>
+        <p>React Application for Writing Commands to MariaDB</p>
       </header>
 
       <main className="App-main">
         <div className="container">
           {/* Log Form Section */}
           <section className="card">
-            <h2>Create New Log Entry</h2>
+            <h2>Create New Command Entry</h2>
             <LogForm onSubmit={createLog} />
           </section>
 
           {/* Log List Section */}
           <section className="card">
             <div className="logs-header">
-              <h2>Log Entries</h2>
+              <h2>Command Entries</h2>
               <div className="controls">
                 <button onClick={fetchLogs} className="btn btn-secondary">
                   🔄 Refresh
@@ -132,7 +132,7 @@ function App() {
 
             {error && <div className="error-message">{error}</div>}
             {loading ? (
-              <div className="loading">Loading logs...</div>
+              <div className="loading">Loading Command...</div>
             ) : (
               <LogList logs={logs} onDelete={deleteLog} />
             )}

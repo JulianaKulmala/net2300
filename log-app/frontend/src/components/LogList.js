@@ -6,7 +6,7 @@ function LogList({ logs, onDelete }) {
   };
 
   if (logs.length === 0) {
-    return <div className="no-logs">No log entries found</div>;
+    return <div className="no-logs">No command entries found</div>;
   }
 
   return (

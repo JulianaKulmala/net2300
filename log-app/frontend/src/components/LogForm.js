@@ -57,7 +57,7 @@ function LogForm({ onSubmit }) {
       {success && <div className="success-message">{success}</div>}
 
       <div className="form-group">
-        <label htmlFor="message">Message *</label>
+        <label htmlFor="message">Command *</label>
         <textarea
           id="message"
           name="message"
@@ -71,7 +71,7 @@ function LogForm({ onSubmit }) {
       </div>
 
       <div className="form-group">
-        <label htmlFor="source">Source</label>
+        <label htmlFor="source">Source(ignore for now)</label>
         <input
           type="text"
           id="source"
