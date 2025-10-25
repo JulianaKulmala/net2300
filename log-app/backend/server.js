@@ -19,7 +19,7 @@ const pool = mysql.createPool({
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'logdb',
+    database: process.env.DB_NAME || 'migrate',
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
@@ -31,8 +31,8 @@ async function initDatabase() {
         const connection = await pool.getConnection();
         
         // Create database if it doesn't exist
-        await connection.query(`CREATE DATABASE IF NOT EXISTS ${process.env.DB_NAME || 'logdb'}`);
-        await connection.query(`USE ${process.env.DB_NAME || 'logdb'}`);
+        await connection.query(`CREATE DATABASE IF NOT EXISTS ${process.env.DB_NAME || 'migrate'}`);
+        await connection.query(`USE ${process.env.DB_NAME || 'migrate'}`);
         
         // Create logs table if it doesn't exist
         await connection.query(`
