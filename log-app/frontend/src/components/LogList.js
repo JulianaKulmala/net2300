@@ -5,15 +5,6 @@ function LogList({ logs, onDelete }) {
     return new Date(timestamp).toLocaleString();
   };
 
-  const formatMetadata = (metadata) => {
-    try {
-      const parsed = typeof metadata === 'string' ? JSON.parse(metadata) : metadata;
-      return JSON.stringify(parsed, null, 2);
-    } catch {
-      return metadata;
-    }
-  };
-
   if (logs.length === 0) {
     return <div className="no-logs">No log entries found</div>;
   }
@@ -37,12 +28,6 @@ function LogList({ logs, onDelete }) {
             <div className="log-source">
               <strong>Source:</strong> {log.source}
             </div>
-          )}
-          {log.metadata && log.metadata !== '{}' && (
-            <details className="log-metadata">
-              <summary>Metadata</summary>
-              <pre>{formatMetadata(log.metadata)}</pre>
-            </details>
           )}
         </div>
       ))}

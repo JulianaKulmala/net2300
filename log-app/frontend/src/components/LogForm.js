@@ -3,8 +3,7 @@ import React, { useState } from 'react';
 function LogForm({ onSubmit }) {
   const [formData, setFormData] = useState({
     message: '',
-    source: '',
-    metadata: ''
+    source: ''
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -31,22 +30,9 @@ function LogForm({ onSubmit }) {
       return;
     }
 
-    // Parse metadata if provided
-    let metadata = {};
-    if (formData.metadata.trim()) {
-      try {
-        metadata = JSON.parse(formData.metadata);
-      } catch (err) {
-        setError('Invalid JSON in metadata field');
-        setLoading(false);
-        return;
-      }
-    }
-
     const logData = {
       message: formData.message,
-      source: formData.source || undefined,
-      metadata: Object.keys(metadata).length > 0 ? metadata : undefined
+      source: formData.source || undefined
     };
 
     const result = await onSubmit(logData);
@@ -57,8 +43,7 @@ function LogForm({ onSubmit }) {
       // Reset form
       setFormData({
         message: '',
-        source: '',
-        metadata: ''
+        source: ''
       });
       setTimeout(() => setSuccess(''), 3000);
     } else {
@@ -95,19 +80,6 @@ function LogForm({ onSubmit }) {
           onChange={handleChange}
           className="form-control"
           placeholder="e.g., UserService, AuthController"
-        />
-      </div>
-
-      <div className="form-group">
-        <label htmlFor="metadata">Metadata (JSON)</label>
-        <textarea
-          id="metadata"
-          name="metadata"
-          value={formData.metadata}
-          onChange={handleChange}
-          className="form-control"
-          rows="2"
-          placeholder='{"userId": 123, "action": "login"}'
         />
       </div>
 

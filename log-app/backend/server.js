@@ -41,7 +41,6 @@ async function initDatabase() {
                 message TEXT NOT NULL,
                 source VARCHAR(100),
                 timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                metadata JSON,
                 INDEX idx_timestamp (timestamp)
             )
         `);
@@ -77,7 +76,7 @@ app.get('/api/logs', async (req, res) => {
 // Create a new log entry
 app.post('/api/logs', async (req, res) => {
     try {
-        const { message, source, metadata } = req.body;
+        const { message, source } = req.body;
         
         // Validation
         if (!message) {
@@ -88,8 +87,8 @@ app.post('/api/logs', async (req, res) => {
         }
 
         const [result] = await pool.query(
-            'INSERT INTO logs (message, source, metadata) VALUES (?, ?, ?)',
-            [message, source || null, JSON.stringify(metadata || {})]
+            'INSERT INTO logs (message, source) VALUES (?, ?)',
+            [message, source || null]
         );
 
         res.status(201).json({ 
@@ -97,8 +96,7 @@ app.post('/api/logs', async (req, res) => {
             data: { 
                 id: result.insertId,
                 message,
-                source,
-                metadata
+                source
             }
         });
     } catch (error) {
