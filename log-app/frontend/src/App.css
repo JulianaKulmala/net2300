@@ -237,6 +237,101 @@ textarea.form-control {
   margin-bottom: 10px;
 }
 
+.log-header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.status-select {
+  padding: 4px 10px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.status-select:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.status-select.status-pending {
+  background: #fff3cd;
+  color: #856404;
+  border-color: #ffc107;
+}
+
+.status-select.status-processing {
+  background: #cfe2ff;
+  color: #084298;
+  border-color: #0d6efd;
+}
+
+.status-select.status-done {
+  background: #d1e7dd;
+  color: #0f5132;
+  border-color: #198754;
+}
+
+.status-select.status-error {
+  background: #f8d7da;
+  color: #842029;
+  border-color: #dc3545;
+}
+
+.log-status-badge {
+  margin-top: 10px;
+}
+
+.badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  display: inline-block;
+}
+
+.badge.status-pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.badge.status-processing {
+  background: #cfe2ff;
+  color: #084298;
+}
+
+.badge.status-done {
+  background: #d1e7dd;
+  color: #0f5132;
+}
+
+.badge.status-error {
+  background: #f8d7da;
+  color: #842029;
+}
+
+/* Status-based log item styling */
+.log-item.status-pending {
+  border-left: 4px solid #ffc107;
+}
+
+.log-item.status-processing {
+  border-left: 4px solid #0d6efd;
+}
+
+.log-item.status-done {
+  border-left: 4px solid #198754;
+}
+
+.log-item.status-error {
+  border-left: 4px solid #dc3545;
+}
+
 .log-level {
   padding: 4px 12px;
   border-radius: 20px;

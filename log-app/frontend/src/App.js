@@ -74,6 +74,29 @@ function App() {
     }
   };
 
+  // Update log status
+  const updateLogStatus = async (id, status) => {
+    try {
+      const response = await fetch(`${API_URL}/logs/${id}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status }),
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        fetchLogs(); // Refresh the list
+      } else {
+        setError(data.error || 'Failed to update status');
+      }
+    } catch (err) {
+      setError('Error connecting to server: ' + err.message);
+    }
+  };
+
   // Clear all logs
   const clearAllLogs = async () => {
     if (!window.confirm('Are you sure you want to clear all logs?')) {
@@ -104,7 +127,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>📝 MariaDB command Manager</h1>
+        <h1>📝 MariaDB migrate Manager</h1>
         <p>React Application for Writing Commands to MariaDB</p>
       </header>
 
@@ -134,7 +157,7 @@ function App() {
             {loading ? (
               <div className="loading">Loading Command...</div>
             ) : (
-              <LogList logs={logs} onDelete={deleteLog} />
+              <LogList logs={logs} onDelete={deleteLog} onStatusChange={updateLogStatus} />
             )}
           </section>
         </div>

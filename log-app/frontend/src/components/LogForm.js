@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 function LogForm({ onSubmit }) {
   const [formData, setFormData] = useState({
     message: '',
-    source: ''
+    source: '',
+    status: 'pending'
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -32,18 +33,20 @@ function LogForm({ onSubmit }) {
 
     const logData = {
       message: formData.message,
-      source: formData.source || undefined
+      source: formData.source || undefined,
+      status: formData.status
     };
 
     const result = await onSubmit(logData);
     setLoading(false);
 
     if (result.success) {
-      setSuccess('Log entry created successfully!');
+      setSuccess('Command entry created successfully!');
       // Reset form
       setFormData({
         message: '',
-        source: ''
+        source: '',
+        status: 'pending'
       });
       setTimeout(() => setSuccess(''), 3000);
     } else {
@@ -65,7 +68,7 @@ function LogForm({ onSubmit }) {
           onChange={handleChange}
           className="form-control"
           rows="3"
-          placeholder="Enter log message..."
+          placeholder="Enter command..."
           required
         />
       </div>
@@ -81,6 +84,23 @@ function LogForm({ onSubmit }) {
           className="form-control"
           placeholder="e.g., UserService, AuthController"
         />
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="status">Status *</label>
+        <select
+          id="status"
+          name="status"
+          value={formData.status}
+          onChange={handleChange}
+          className="form-control"
+          required
+        >
+          <option value="pending">Pending</option>
+          <option value="processing">Processing</option>
+          <option value="done">Done</option>
+          <option value="error">Error</option>
+        </select>
       </div>
 
       <button type="submit" className="btn btn-primary" disabled={loading}>

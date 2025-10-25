@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors({
     origin: '*', // Allow all origins (for development/testing)
-    methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
@@ -40,8 +40,10 @@ async function initDatabase() {
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 message TEXT NOT NULL,
                 source VARCHAR(100),
+                status ENUM('pending', 'processing', 'done', 'error') DEFAULT 'pending',
                 timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                INDEX idx_timestamp (timestamp)
+                INDEX idx_timestamp (timestamp),
+                INDEX idx_status (status)
             )
         `);
         
@@ -76,7 +78,7 @@ app.get('/api/logs', async (req, res) => {
 // Create a new log entry
 app.post('/api/logs', async (req, res) => {
     try {
-        const { message, source } = req.body;
+        const { message, source, status } = req.body;
         
         // Validation
         if (!message) {
@@ -86,9 +88,13 @@ app.post('/api/logs', async (req, res) => {
             });
         }
 
+        // Validate status if provided
+        const validStatuses = ['pending', 'processing', 'done', 'error'];
+        const logStatus = status && validStatuses.includes(status) ? status : 'pending';
+
         const [result] = await pool.query(
-            'INSERT INTO logs (message, source) VALUES (?, ?)',
-            [message, source || null]
+            'INSERT INTO logs (message, source, status) VALUES (?, ?, ?)',
+            [message, source || null, logStatus]
         );
 
         res.status(201).json({ 
@@ -96,7 +102,8 @@ app.post('/api/logs', async (req, res) => {
             data: { 
                 id: result.insertId,
                 message,
-                source
+                source,
+                status: logStatus
             }
         });
     } catch (error) {
@@ -118,6 +125,37 @@ app.delete('/api/logs/:id', async (req, res) => {
         res.json({ success: true, message: 'Log deleted successfully' });
     } catch (error) {
         console.error('Error deleting log:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Update log status
+app.patch('/api/logs/:id/status', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+        
+        // Validate status
+        const validStatuses = ['pending', 'processing', 'done', 'error'];
+        if (!status || !validStatuses.includes(status)) {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'Invalid status. Must be: pending, processing, done, or error' 
+            });
+        }
+        
+        const [result] = await pool.query(
+            'UPDATE logs SET status = ? WHERE id = ?',
+            [status, id]
+        );
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, error: 'Log not found' });
+        }
+        
+        res.json({ success: true, message: 'Status updated successfully', status });
+    } catch (error) {
+        console.error('Error updating status:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
