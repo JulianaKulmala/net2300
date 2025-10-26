@@ -223,7 +223,7 @@ function App() {
       <header className="App-header">
         <h1>📝 MariaDB migrate Manager</h1>
         <p>React Application for Writing Commands to MariaDB</p>
-        <p style="color: red;">Update read-pending.sh with your database connection details</p>
+        <p>Update read-pending.sh with your database connection details</p>
       </header>
 
       <main className="App-main">
