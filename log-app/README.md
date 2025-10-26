@@ -401,6 +401,9 @@ Your Name
 ## 🤝 Contributing
 
 Pull requests are welcome!
+
+## if git conflict
+git reset --hard
 ### if docker fails to start
 
 $ sudo firewall-cmd --permanent --zone=docker --change-interface=docker0
