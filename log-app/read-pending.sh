@@ -16,7 +16,7 @@ DB_USER="root"
 DB_PASS="rootpassword"
 DB_NAME="logdb"
 
-# Colors for output
+# Colors for outputy
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
