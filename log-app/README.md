@@ -401,3 +401,18 @@ Your Name
 ## 🤝 Contributing
 
 Pull requests are welcome!
+### if docker fails to start
+
+$ sudo firewall-cmd --permanent --zone=docker --change-interface=docker0
+$ sudo firewall-cmd --reload
+
+cd log-app
+
+# Stop and remove existing containers and volumes
+docker compose down -v
+
+# Start fresh (this will run the SQL file in logdb)
+docker compose up -d
+
+# Verify the tables were created in logdb
+docker exec -it logapp-mariadb mysql -uroot -prootpassword logdb -e "SHOW TABLES;"

@@ -118,6 +118,7 @@ if systemctl is-active --quiet firewalld; then
         print_info "Configuring firewall for Docker..."
         firewall-cmd --permanent --zone=trusted --add-interface=docker0 2>/dev/null || true
         firewall-cmd --permanent --zone=public --add-masquerade 2>/dev/null || true
+        firewall-cmd --permanent --zone=docker --change-interface=docker0 2>/dev/null || true
         firewall-cmd --reload
         print_info "Firewall configured for Docker"
         
