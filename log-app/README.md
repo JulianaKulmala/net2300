@@ -402,10 +402,15 @@ Your Name
 
 Pull requests are welcome!
 
+
+
+
 ## if git conflict
 git reset --hard
 ### if docker fails to start
 
+
+$ sudo firewall-cmd --get-active-zones
 $ sudo firewall-cmd --permanent --zone=docker --change-interface=docker0
 $ sudo firewall-cmd --reload
 
