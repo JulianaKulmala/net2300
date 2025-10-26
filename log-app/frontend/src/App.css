@@ -433,3 +433,90 @@ textarea.form-control {
     flex-wrap: wrap;
   }
 }
+
+/* Tab Navigation */
+.tab-navigation {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.tab-button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  background: white;
+  color: #666;
+  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.tab-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.tab-button.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+/* Execution Log Styles */
+.execution-log-item {
+  border-left: 4px solid #6c757d;
+}
+
+.log-reference {
+  font-size: 12px;
+  color: #999;
+  margin-left: 10px;
+}
+
+.execution-command {
+  margin: 10px 0;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 4px;
+}
+
+.execution-command code {
+  font-family: 'Courier New', monospace;
+  color: #333;
+}
+
+.execution-output {
+  margin: 10px 0;
+  padding: 10px;
+  background: #2d2d2d;
+  border-radius: 4px;
+  color: #f8f8f8;
+}
+
+.execution-output pre {
+  margin: 5px 0 0 0;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.execution-exit-code {
+  margin-top: 10px;
+  padding: 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.execution-exit-code.exit-success {
+  background: #d1e7dd;
+  color: #0f5132;
+}
+
+.execution-exit-code.exit-error {
+  background: #f8d7da;
+  color: #842029;
+}
+

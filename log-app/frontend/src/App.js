@@ -2,11 +2,16 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import LogForm from './components/LogForm';
 import LogList from './components/LogList';
+import ExecutionLogForm from './components/ExecutionLogForm';
+import ExecutionLogList from './components/ExecutionLogList';
 
 function App() {
   const [logs, setLogs] = useState([]);
+  const [executionLogs, setExecutionLogs] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [executionLoading, setExecutionLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState('commands'); // 'commands' or 'executions'
 
   // Use environment variable or detect current hostname
   const API_URL = `http://${window.location.hostname}:5000/api`;
@@ -120,8 +125,97 @@ function App() {
     }
   };
 
+  // ========== Execution Log Functions ==========
+
+  // Fetch execution logs
+  const fetchExecutionLogs = async () => {
+    setExecutionLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`${API_URL}/execution-logs`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setExecutionLogs(data.data);
+      } else {
+        setError(data.error || 'Failed to fetch execution logs');
+      }
+    } catch (err) {
+      setError('Error connecting to server: ' + err.message);
+    } finally {
+      setExecutionLoading(false);
+    }
+  };
+
+  // Create execution log
+  const createExecutionLog = async (logData) => {
+    try {
+      const response = await fetch(`${API_URL}/execution-logs`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(logData),
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        fetchExecutionLogs(); // Refresh the list
+        return { success: true };
+      } else {
+        return { success: false, error: data.error };
+      }
+    } catch (err) {
+      return { success: false, error: 'Error connecting to server: ' + err.message };
+    }
+  };
+
+  // Delete execution log
+  const deleteExecutionLog = async (id) => {
+    try {
+      const response = await fetch(`${API_URL}/execution-logs/${id}`, {
+        method: 'DELETE',
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        fetchExecutionLogs(); // Refresh the list
+      } else {
+        setError(data.error || 'Failed to delete execution log');
+      }
+    } catch (err) {
+      setError('Error connecting to server: ' + err.message);
+    }
+  };
+
+  // Clear all execution logs
+  const clearAllExecutionLogs = async () => {
+    if (!window.confirm('Are you sure you want to clear all execution logs?')) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`${API_URL}/execution-logs`, {
+        method: 'DELETE',
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        fetchExecutionLogs(); // Refresh the list
+      } else {
+        setError(data.error || 'Failed to clear execution logs');
+      }
+    } catch (err) {
+      setError('Error connecting to server: ' + err.message);
+    }
+  };
+
   useEffect(() => {
     fetchLogs();
+    fetchExecutionLogs();
   }, []);
 
   return (
@@ -133,33 +227,87 @@ function App() {
 
       <main className="App-main">
         <div className="container">
-          {/* Log Form Section */}
-          <section className="card">
-            <h2>Create New Command Entry</h2>
-            <LogForm onSubmit={createLog} />
-          </section>
+          {/* Tab Navigation */}
+          <div className="tab-navigation">
+            <button 
+              className={`tab-button ${activeTab === 'commands' ? 'active' : ''}`}
+              onClick={() => setActiveTab('commands')}
+            >
+              📋 Commands
+            </button>
+            <button 
+              className={`tab-button ${activeTab === 'executions' ? 'active' : ''}`}
+              onClick={() => setActiveTab('executions')}
+            >
+              ⚙️ Execution Logs
+            </button>
+          </div>
 
-          {/* Log List Section */}
-          <section className="card">
-            <div className="logs-header">
-              <h2>Command Entries</h2>
-              <div className="controls">
-                <button onClick={fetchLogs} className="btn btn-secondary">
-                  🔄 Refresh
-                </button>
-                <button onClick={clearAllLogs} className="btn btn-danger">
-                  🗑️ Clear All
-                </button>
-              </div>
-            </div>
+          {/* Commands Tab */}
+          {activeTab === 'commands' && (
+            <>
+              {/* Log Form Section */}
+              <section className="card">
+                <h2>Create New Command Entry</h2>
+                <LogForm onSubmit={createLog} />
+              </section>
 
-            {error && <div className="error-message">{error}</div>}
-            {loading ? (
-              <div className="loading">Loading Command...</div>
-            ) : (
-              <LogList logs={logs} onDelete={deleteLog} onStatusChange={updateLogStatus} />
-            )}
-          </section>
+              {/* Log List Section */}
+              <section className="card">
+                <div className="logs-header">
+                  <h2>Command Entries</h2>
+                  <div className="controls">
+                    <button onClick={fetchLogs} className="btn btn-secondary">
+                      🔄 Refresh
+                    </button>
+                    <button onClick={clearAllLogs} className="btn btn-danger">
+                      🗑️ Clear All
+                    </button>
+                  </div>
+                </div>
+
+                {error && <div className="error-message">{error}</div>}
+                {loading ? (
+                  <div className="loading">Loading Command...</div>
+                ) : (
+                  <LogList logs={logs} onDelete={deleteLog} onStatusChange={updateLogStatus} />
+                )}
+              </section>
+            </>
+          )}
+
+          {/* Execution Logs Tab */}
+          {activeTab === 'executions' && (
+            <>
+              {/* Execution Log Form Section */}
+              <section className="card">
+                <h2>Create New Execution Log</h2>
+                <ExecutionLogForm onSubmit={createExecutionLog} />
+              </section>
+
+              {/* Execution Log List Section */}
+              <section className="card">
+                <div className="logs-header">
+                  <h2>Execution Logs</h2>
+                  <div className="controls">
+                    <button onClick={fetchExecutionLogs} className="btn btn-secondary">
+                      🔄 Refresh
+                    </button>
+                    <button onClick={clearAllExecutionLogs} className="btn btn-danger">
+                      🗑️ Clear All
+                    </button>
+                  </div>
+                </div>
+
+                {error && <div className="error-message">{error}</div>}
+                {executionLoading ? (
+                  <div className="loading">Loading Execution Logs...</div>
+                ) : (
+                  <ExecutionLogList logs={executionLogs} onDelete={deleteExecutionLog} />
+                )}
+              </section>
+            </>
+          )}
         </div>
       </main>
     </div>
