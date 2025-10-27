@@ -407,6 +407,11 @@ Pull requests are welcome!
 
 ## if git conflict
 git reset --hard
+
+## rebuild after git pull
+docker compose build
+## restart docker compose
+docker compose down && docker compose up -d
 ### if docker fails to start
 
 
@@ -424,3 +429,4 @@ docker compose up -d
 
 # Verify the tables were created in logdb
 docker exec -it logapp-mariadb mysql -uroot -prootpassword logdb -e "SHOW TABLES;"
+
