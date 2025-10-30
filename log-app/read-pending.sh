@@ -179,7 +179,7 @@ echo ""
 cleanup() {
     echo ""
     echo "Cleaning up..."
-    rm -f "$MYSQL_CONFIG"
+    #rm -f "$MYSQL_CONFIG"
     exit 0
 }
 
