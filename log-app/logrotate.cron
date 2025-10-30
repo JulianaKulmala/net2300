@@ -1,0 +1,17 @@
+# Cron job to ensure read-pending.sh is running hourly
+# Runs at the top of every hour. If not already running, starts it and logs output.
+# Adjust the absolute paths below if you move the repository.
+
+SHELL=/bin/bash
+PATH=/usr/local/bin:/usr/bin:/bin
+MAILTO=""
+
+# Absolute paths
+SCRIPT="~/Desktop/teaching/net2300/git/net2300/log-app/logrotate.sh"
+LOGFILE="~/Desktop/teaching/net2300/git/net2300/log-app/logrotate.cron.log"
+
+# At minute 0 of every hour, start the worker if it's not already running
+0 * * * * pgrep -f "$SCRIPT" >/dev/null 2>&1 || /bin/bash -lc "$SCRIPT >> $LOGFILE 2>&1 &"
+
+# Optional: rotate the cron log weekly (Sunday at 03:15)
+15 3 * * 0 /usr/bin/tail -n 5000 "$LOGFILE" > "$LOGFILE.tmp" 2>/dev/null && mv "$LOGFILE.tmp" "$LOGFILE" 2>/dev/null
