@@ -276,6 +276,49 @@ app.delete('/api/execution-logs', async (req, res) => {
     }
 });
 
+// ========== Export Log Endpoints ==========
+
+// Get all export logs
+app.get('/api/export-logs', async (req, res) => {
+    try {
+        const [rows] = await pool.query(
+            'SELECT * FROM export_log ORDER BY exported_at DESC LIMIT 100'
+        );
+        res.json({ success: true, data: rows });
+    } catch (error) {
+        console.error('Error fetching export logs:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Delete an export log entry
+app.delete('/api/export-logs/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const [result] = await pool.query('DELETE FROM export_log WHERE id = ?', [id]);
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, error: 'Export log not found' });
+        }
+        
+        res.json({ success: true, message: 'Export log deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting export log:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Clear all export logs
+app.delete('/api/export-logs', async (req, res) => {
+    try {
+        await pool.query('TRUNCATE TABLE export_log');
+        res.json({ success: true, message: 'All export logs cleared' });
+    } catch (error) {
+        console.error('Error clearing export logs:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // Start server
 async function startServer() {
     try {
