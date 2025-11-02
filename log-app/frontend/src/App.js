@@ -125,6 +125,29 @@ function App() {
     }
   };
 
+  // Export database - insert mysqldump command into logs
+  const exportDatabase = async (database) => {
+    const commands = {
+      logdb: 'mysqldump -h 127.0.0.1 -u root -prootpassword logdb > backup.sql',
+      logdbqa: 'mysqldump -h 127.0.0.1 -u root -prootpassword logdbqa > backup_qa.sql',
+      logdbprod: 'mysqldump -h 127.0.0.1 -u root -prootpassword logdbprod > backup_prod.sql'
+    };
+
+    const command = commands[database];
+    if (!command) return;
+
+    const result = await createLog({
+      message: command,
+      status: 'pending'
+    });
+
+    if (result.success) {
+      alert(`Database export command added: ${database}`);
+    } else {
+      alert(`Failed to add export command: ${result.error}`);
+    }
+  };
+
   // ========== Execution Log Functions ==========
 
   // Fetch execution logs
@@ -249,7 +272,27 @@ function App() {
             <>
               {/* Log Form Section */}
               <section className="card">
-                <h2>Create New Command Entry</h2>
+                <div className="logs-header">
+                  <h2>Create New Command Entry</h2>
+                  <div className="controls">
+                    <div className="dropdown">
+                      <select 
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            exportDatabase(e.target.value);
+                            e.target.value = ''; // Reset dropdown
+                          }
+                        }}
+                        className="btn btn-primary"
+                      >
+                        <option value="">💾 Export Database</option>
+                        <option value="logdb">Export logdb</option>
+                        <option value="logdbqa">Export logdbqa</option>
+                        <option value="logdbprod">Export logdbprod</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
                 <LogForm onSubmit={createLog} />
               </section>
 
