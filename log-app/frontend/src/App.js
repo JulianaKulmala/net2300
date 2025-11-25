@@ -131,7 +131,7 @@ function App() {
   // Export database - insert mysqldump command into logs
   const exportDatabase = async (database) => {
     const commands = {
-      logdb: 'mysqldump -h 127.0.0.1 -u root -prootpassword logdb > backup.sql',
+      logdb: 'mysqldump --skip-add-drop-table --complete-insert -h 127.0.0.1 -u root -prootpassword logdb   > backup.sql',
       logdbqa: 'mysqldump -h 127.0.0.1 -u root -prootpassword logdbqa > backup_qa.sql',
       logdbprod: 'mysqldump -h 127.0.0.1 -u root -prootpassword logdbprod > backup_prod.sql'
     };
@@ -165,8 +165,8 @@ function App() {
 
     const db = entry.database_name;
     const file = entry.filename;
-    // Quote filename in case of spaces; redirection supports quoted path
-    const command = `mysql -h 127.0.0.1 -u root -prootpassword ${db} < "${file}"`;
+    // Drop/recreate DB, then import with FK checks disabled in a single session using shell script
+    const command = `mysql -h 127.0.0.1 -u root -prootpassword -e "DROP DATABASE IF EXISTS ${db}; CREATE DATABASE ${db};" && (echo "SET FOREIGN_KEY_CHECKS=0;" && cat "${file}" && echo "SET FOREIGN_KEY_CHECKS=1;") | mysql -h 127.0.0.1 -u root -prootpassword ${db}`;
 
     const result = await createLog({
       message: command,

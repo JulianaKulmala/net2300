@@ -59,6 +59,18 @@ sql_escape() {
 }
 
 ################################################################################
+# Mask sensitive credentials in command/output before printing or logging
+################################################################################
+mask_sensitive() {
+    local s="$1"
+    # Mask forms: -ppassword, --password=password, --password password
+    printf '%s' "$s" | sed -E \
+        -e 's/(^|[[:space:]])(-p)[^[:space:]]+/\1-p*******/g' \
+        -e 's/(--password=)[^[:space:]]+/\1*******/g' \
+        -e 's/(--password)[[:space:]]+[^[:space:]]+/\1 ******/g'
+}
+
+################################################################################
 # Ensure execution_log table exists
 ################################################################################
 ensure_execution_log_table() {
@@ -75,13 +87,19 @@ log_execution() {
     local status="$3"
     local exit_code="$4"
     local out="$5"
+    # Mask sensitive data in logs
+    local masked_cmd
+    local masked_out
+    masked_cmd=$(mask_sensitive "$cmd")
+    masked_out=$(mask_sensitive "$out")
+
     echo "Logging execution for log_id: $log_id, status: $status"
-    echo "Command: $cmd"
+    echo "Command: $masked_cmd"
     # Limit size to avoid overly large rows (optional)
     local cmd_limited
     local out_limited
-    cmd_limited=$(printf '%.4000s' "$cmd")
-    out_limited=$(printf '%.20000s' "$out")
+    cmd_limited=$(printf '%.4000s' "$masked_cmd")
+    out_limited=$(printf '%.20000s' "$masked_out")
 
     # Escape for SQL
     local cmd_esc
@@ -93,6 +111,71 @@ log_execution() {
 INSERT INTO execution_log (log_id, command, exit_code, output)
 VALUES ($log_id, '$cmd_esc',  ${exit_code:-NULL}, '$out_esc');
 SQL
+}
+
+################################################################################
+# Insert an export log record
+################################################################################
+log_export() {
+    local db_name="$1"
+    local filename="$2"
+    local status="$3"
+    local output="$4"
+    local file_size="${5:-NULL}"
+    
+    echo "Logging export for database: $db_name, file: $filename, status: $status"
+    
+    # Escape for SQL
+    local db_name_esc
+    local filename_esc
+    local output_esc
+    db_name_esc=$(sql_escape "$db_name")
+    filename_esc=$(sql_escape "$filename")
+    output_esc=$(sql_escape "$output")
+
+    mysql --defaults-file="$MYSQL_CONFIG" -N -B <<SQL
+INSERT INTO export_log (database_name, filename, status, output, file_size)
+VALUES ('$db_name_esc', '$filename_esc', '$status', '$output_esc', $file_size);
+SQL
+}
+
+################################################################################
+# Prepare mysqldump command: add timestamped filename and detect db
+################################################################################
+prepare_mysqldump() {
+    local cmd_in="$1"
+    local timestamp
+    timestamp=$(date +%Y%m%d_%H%M%S)
+
+    local db_name=""
+    local new_filename=""
+    local cmd_out="$cmd_in"
+
+    # Detect which database and replace output filename
+    if [[ "$cmd_in" =~ backup\.sql ]]; then
+        db_name="logdb"
+        new_filename="backup-${timestamp}.sql"
+        cmd_out="${cmd_in//backup.sql/$new_filename}"
+    elif [[ "$cmd_in" =~ backup_qa\.sql ]]; then
+        db_name="logdbqa"
+        new_filename="backup_qa-${timestamp}.sql"
+        cmd_out="${cmd_in//backup_qa.sql/$new_filename}"
+    elif [[ "$cmd_in" =~ backup_prod\.sql ]]; then
+        db_name="logdbprod"
+        new_filename="backup_prod-${timestamp}.sql"
+        cmd_out="${cmd_in//backup_prod.sql/$new_filename}"
+    else
+        # Default if no specific backup file pattern found
+        db_name="unknown"
+        new_filename="backup-${timestamp}.sql"
+    fi
+
+    # Print diagnostics to stderr so callers using process substitution only read the triplet
+    echo "Detected mysqldump command for database: $db_name" >&2
+    echo "Output file: $new_filename" >&2
+
+    # Return triplet: cmd|db_name|new_filename
+    printf "%s|%s|%s\n" "$cmd_out" "$db_name" "$new_filename"
 }
 
 ################################################################################
@@ -124,8 +207,13 @@ process_pending_logs() {
         cmd="${cmd//\\n/}"
         cmd="${cmd//\\r/}"
 
+        # Check if this is a mysqldump command and rewrite via helper
+        if [[ "$cmd" =~ ^mysqldump ]]; then
+            IFS='|' read -r cmd db_name new_filename < <(prepare_mysqldump "$cmd")
+        fi
 
-        echo "Command: $cmd"
+    # Print masked command to console
+    echo "Command: $(mask_sensitive "$cmd")"
         echo "---"
         
         # Update status to 'processing'
@@ -139,14 +227,32 @@ process_pending_logs() {
             # Command succeeded - update status to 'done'
             update_log_status "$id" "done"
             log_execution "$id" "$cmd" "done" "$exit_code" "$output"
+            
+            # If this was a mysqldump command, log to export_log
+            if [[ "$cmd" =~ ^mysqldump ]] && [ -n "${new_filename:-}" ]; then
+                # Get file size if file exists
+                if [ -f "$new_filename" ]; then
+                    file_size=$(stat -f%z "$new_filename" 2>/dev/null || stat -c%s "$new_filename" 2>/dev/null || echo "NULL")
+                else
+                    file_size="NULL"
+                fi
+                log_export "$db_name" "$new_filename" "success" "$output" "$file_size"
+            fi
+            
             echo "✓ Command completed successfully (ID: $id)"
-            [ -n "$output" ] && echo "Output: $output"
+            [ -n "$output" ] && echo "Output: $(mask_sensitive "$output")"
         else
             # Command failed - update status to 'error'
             update_log_status "$id" "error"
             log_execution "$id" "$cmd" "error" "$exit_code" "$output"
+            
+            # If this was a mysqldump command, log to export_log with error
+            if [[ "$cmd" =~ ^mysqldump ]] && [ -n "${new_filename:-}" ]; then
+                log_export "$db_name" "$new_filename" "error" "$output" "NULL"
+            fi
+            
             echo "✗ Command failed (ID: $id)"
-            [ -n "$output" ] && echo "Error: $output"
+            [ -n "$output" ] && echo "Error: $(mask_sensitive "$output")"
         fi
         
         echo ""
