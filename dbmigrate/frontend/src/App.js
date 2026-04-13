@@ -1,0 +1,169 @@
+import React, { useState, useEffect } from 'react';
+import './App.css';
+import LogForm from './components/LogForm';
+import LogList from './components/LogList';
+
+function App() {
+  const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Use environment variable or detect current hostname
+  const API_URL = `http://${window.location.hostname}:5000/api`;
+
+  // Fetch logs
+  const fetchLogs = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`${API_URL}/logs`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setLogs(data.data);
+      } else {
+        setError(data.error || 'Failed to fetch logs');
+      }
+    } catch (err) {
+      setError('Error connecting to server: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Create log
+  const createLog = async (logData) => {
+    try {
+      const response = await fetch(`${API_URL}/logs`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(logData),
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        fetchLogs(); // Refresh the list
+        return { success: true };
+      } else {
+        return { success: false, error: data.error };
+      }
+    } catch (err) {
+      return { success: false, error: 'Error connecting to server: ' + err.message };
+    }
+  };
+
+  // Delete log
+  const deleteLog = async (id) => {
+    try {
+      const response = await fetch(`${API_URL}/logs/${id}`, {
+        method: 'DELETE',
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        fetchLogs(); // Refresh the list
+      } else {
+        setError(data.error || 'Failed to delete log');
+      }
+    } catch (err) {
+      setError('Error connecting to server: ' + err.message);
+    }
+  };
+
+  // Update log status
+  const updateLogStatus = async (id, status) => {
+    try {
+      const response = await fetch(`${API_URL}/logs/${id}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status }),
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        fetchLogs(); // Refresh the list
+      } else {
+        setError(data.error || 'Failed to update status');
+      }
+    } catch (err) {
+      setError('Error connecting to server: ' + err.message);
+    }
+  };
+
+  // Clear all logs
+  const clearAllLogs = async () => {
+    if (!window.confirm('Are you sure you want to clear all logs?')) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`${API_URL}/logs`, {
+        method: 'DELETE',
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        fetchLogs(); // Refresh the list
+      } else {
+        setError(data.error || 'Failed to clear logs');
+      }
+    } catch (err) {
+      setError('Error connecting to server: ' + err.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchLogs();
+  }, []);
+
+  return (
+    <div className="App">
+      <header className="App-header">
+        <h1>📝 MariaDB migrate Manager</h1>
+        <p>React Application for Writing Commands to MariaDB</p>
+      </header>
+
+      <main className="App-main">
+        <div className="container">
+          {/* Log Form Section */}
+          <section className="card">
+            <h2>Create New Command Entry</h2>
+            <LogForm onSubmit={createLog} />
+          </section>
+
+          {/* Log List Section */}
+          <section className="card">
+            <div className="logs-header">
+              <h2>Command Entries</h2>
+              <div className="controls">
+                <button onClick={fetchLogs} className="btn btn-secondary">
+                  🔄 Refresh
+                </button>
+                <button onClick={clearAllLogs} className="btn btn-danger">
+                  🗑️ Clear All
+                </button>
+              </div>
+            </div>
+
+            {error && <div className="error-message">{error}</div>}
+            {loading ? (
+              <div className="loading">Loading Command...</div>
+            ) : (
+              <LogList logs={logs} onDelete={deleteLog} onStatusChange={updateLogStatus} />
+            )}
+          </section>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+export default App;
