@@ -46,8 +46,23 @@ async function initDatabase() {
             )
         `);
         
+        // Create execution_log table if it doesn't exist
+        await connection.query(`
+            CREATE TABLE IF NOT EXISTS execution_log (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                log_id INT,
+                command TEXT NOT NULL,
+                output TEXT,
+                exit_code INT,
+                executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_log_id (log_id),
+                INDEX idx_executed_at (executed_at),
+                FOREIGN KEY (log_id) REFERENCES logs(id) ON DELETE SET NULL
+            )
+        `);
+        
         connection.release();
-        console.log('✓ Database and table initialized');
+        console.log('✓ Database and tables initialized');
     } catch (error) {
         console.error('Database initialization error:', error);
         throw error;
@@ -165,6 +180,141 @@ app.delete('/api/logs', async (req, res) => {
         res.json({ success: true, message: 'All logs cleared' });
     } catch (error) {
         console.error('Error clearing logs:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ========== Execution Log Endpoints ==========
+
+// Get all execution logs
+app.get('/api/execution-logs', async (req, res) => {
+    try {
+        const [rows] = await pool.query(
+            'SELECT * FROM execution_log ORDER BY executed_at DESC LIMIT 100'
+        );
+        res.json({ success: true, data: rows });
+    } catch (error) {
+        console.error('Error fetching execution logs:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Get execution logs for a specific log_id
+app.get('/api/execution-logs/log/:log_id', async (req, res) => {
+    try {
+        const { log_id } = req.params;
+        const [rows] = await pool.query(
+            'SELECT * FROM execution_log WHERE log_id = ? ORDER BY executed_at DESC',
+            [log_id]
+        );
+        res.json({ success: true, data: rows });
+    } catch (error) {
+        console.error('Error fetching execution logs:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Create a new execution log entry
+app.post('/api/execution-logs', async (req, res) => {
+    try {
+        const { log_id, command, output, exit_code } = req.body;
+        
+        // Validation
+        if (!command) {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'Command is required' 
+            });
+        }
+
+        const [result] = await pool.query(
+            'INSERT INTO execution_log (log_id, command, output, exit_code) VALUES (?, ?, ?, ?)',
+            [log_id || null, command, output || null, exit_code || null]
+        );
+
+        res.status(201).json({ 
+            success: true, 
+            data: { 
+                id: result.insertId,
+                log_id,
+                command,
+                output,
+                exit_code
+            }
+        });
+    } catch (error) {
+        console.error('Error creating execution log:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Delete an execution log entry
+app.delete('/api/execution-logs/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const [result] = await pool.query('DELETE FROM execution_log WHERE id = ?', [id]);
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, error: 'Execution log not found' });
+        }
+        
+        res.json({ success: true, message: 'Execution log deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting execution log:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Clear all execution logs
+app.delete('/api/execution-logs', async (req, res) => {
+    try {
+        await pool.query('TRUNCATE TABLE execution_log');
+        res.json({ success: true, message: 'All execution logs cleared' });
+    } catch (error) {
+        console.error('Error clearing execution logs:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ========== Export Log Endpoints ==========
+
+// Get all export logs
+app.get('/api/export-logs', async (req, res) => {
+    try {
+        const [rows] = await pool.query(
+            'SELECT * FROM export_log ORDER BY exported_at DESC LIMIT 100'
+        );
+        res.json({ success: true, data: rows });
+    } catch (error) {
+        console.error('Error fetching export logs:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Delete an export log entry
+app.delete('/api/export-logs/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const [result] = await pool.query('DELETE FROM export_log WHERE id = ?', [id]);
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, error: 'Export log not found' });
+        }
+        
+        res.json({ success: true, message: 'Export log deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting export log:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Clear all export logs
+app.delete('/api/export-logs', async (req, res) => {
+    try {
+        await pool.query('TRUNCATE TABLE export_log');
+        res.json({ success: true, message: 'All export logs cleared' });
+    } catch (error) {
+        console.error('Error clearing export logs:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });

@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # MariaDB Database
   mariadb:
@@ -12,13 +10,19 @@ services:
       MYSQL_USER: logapp
       MYSQL_PASSWORD: logapp123
     ports:
-      - "3306:3306"
+      - '3306:3306'
     volumes:
       - mariadb_data:/var/lib/mysql
+      - ./mysqlsampledatabase.sql:/docker-entrypoint-initdb.d/01-mysqlsampledatabase.sql
+      - ./init-databases.sql:/docker-entrypoint-initdb.d/02-init-databases.sql
     networks:
       - logapp-network
     healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      test:
+        - CMD
+        - healthcheck.sh
+        - '--connect'
+        - '--innodb_initialized'
       interval: 10s
       timeout: 5s
       retries: 5
@@ -38,7 +42,7 @@ services:
       DB_NAME: logdb
       NODE_ENV: production
     ports:
-      - "5000:5000"
+      - '5000:5000'
     depends_on:
       mariadb:
         condition: service_healthy
@@ -46,7 +50,7 @@ services:
       - logapp-network
     # Note: Backend runs Node.js 18 Alpine with Express API
 
-  # Frontend React App
+    # Frontend React App
   frontend:
     build:
       context: ./frontend
@@ -56,14 +60,14 @@ services:
     environment:
       REACT_APP_API_URL: http://localhost:5000/api
     ports:
-      - "3000:80"
+      - '3000:80'
     depends_on:
       - backend
     networks:
       - logapp-network
     # Note: Uses Node.js 18 for build stage, then serves via Apache HTTP Server
 
-  # phpMyAdmin - Database Management Tool
+    # phpMyAdmin - Database Management Tool
   phpmyadmin:
     image: phpmyadmin:latest
     container_name: logapp-phpmyadmin
@@ -76,7 +80,7 @@ services:
       MYSQL_ROOT_PASSWORD: rootpassword
       UPLOAD_LIMIT: 100M
     ports:
-      - "8080:80"
+      - '8080:80'
     depends_on:
       mariadb:
         condition: service_healthy

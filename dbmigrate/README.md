@@ -401,3 +401,32 @@ Your Name
 ## 🤝 Contributing
 
 Pull requests are welcome!
+
+##  Database erd:
+[text](https://www.mysqltutorial.org/getting-started-with-mysql/mysql-sample-database/)
+
+## if git conflict
+git reset --hard
+
+## rebuild after git pull
+docker compose build
+## restart docker compose
+docker compose down && docker compose up -d
+### if docker fails to start
+
+
+$ sudo firewall-cmd --get-active-zones
+$ sudo firewall-cmd --permanent --zone=docker --change-interface=docker0
+$ sudo firewall-cmd --reload
+
+cd log-app
+
+# Stop and remove existing containers and volumes
+docker compose down -v
+
+# Start fresh (this will run the SQL file in logdb)
+docker compose up -d
+
+# Verify the tables were created in logdb
+docker exec -it logapp-mariadb mysql -uroot -prootpassword logdb -e "SHOW TABLES;"
+
