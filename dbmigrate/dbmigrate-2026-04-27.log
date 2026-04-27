@@ -1,0 +1,9 @@
+Rotated at Sun Apr 26 09:12:44 PM EDT 2026
+Engine started at Sun Apr 26 11:43:54 PM EDT 2026
+Engine started at Sun Apr 26 11:45:10 PM EDT 2026
+Engine started at Sun Apr 26 11:55:17 PM EDT 2026
+Engine started at Sun Apr 26 11:55:50 PM EDT 2026
+Running log id 9: mysqldump -h 127.0.0.1 -u root -prootpassword logdb > backup.sql at Sun Apr 26 11:56:34 PM EDT 2026
+SUCCESS id 9: 
+Running log id 10: mysqldump -h 127.0.0.1 -u root -prootpassword logdb > backup.sql at Sun Apr 26 11:57:19 PM EDT 2026
+SUCCESS id 10: 
